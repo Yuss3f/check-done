@@ -1,0 +1,86 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f3f4f6;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #1d4ed8;
+  margin-bottom: 20px;
+}
+
+.input-section {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+#task-input {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #60a5fa;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+#add-task-btn {
+  background-color: #1d4ed8;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+#add-task-btn:hover {
+  background-color: #2563eb;
+}
+
+ul {
+  list-style-type: none;
+}
+
+li {
+  background-color: #e5e7eb;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+li.completed {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+button.delete-btn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 5px;
+  cursor: pointer;
+}
+

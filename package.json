@@ -1,0 +1,27 @@
+{
+  "name": "check-done",
+  "version": "1.0.0",
+  "description": "**Check Done** is a simple and fully functional **To-Do List Web Application** that allows users to add, delete, and mark tasks as complete. The project was built using basic HTML, CSS, and JavaScript, and it utilizes the browser's localStorage to store tasks persistently.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yuss3f/check-done.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Yuss3f/check-done/issues"
+  },
+  "homepage": "https://github.com/Yuss3f/check-done#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.1"
+  }
+}
