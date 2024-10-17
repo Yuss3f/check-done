@@ -4,7 +4,7 @@
   "description": "**Check Done** is a simple and fully functional **To-Do List Web Application** that allows users to add, delete, and mark tasks as complete. The project was built using basic HTML, CSS, and JavaScript, and it utilizes the browser's localStorage to store tasks persistently.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node server.js"
   },
   "repository": {
@@ -29,7 +29,5 @@
     "jest": "^29.7.0",
     "supertest": "^7.0.0"
   }
-  "scripts": {
-    "test": "jest"
 
 }

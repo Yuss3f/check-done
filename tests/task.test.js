@@ -1,9 +1,19 @@
 const request = require('supertest');
 const app = require('../server'); // Import your Express app
+const mongoose = require('mongoose');
 const Task = require('../models/Task'); // Import the Task model
 
 describe('Task API', () => {
+    beforeAll(async () => {
+        await mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    });
+
+    afterAll(async () => {
+        await mongoose.connection.close();
+    });
+
     beforeEach(async () => {
+        console.log('Clearing the tasks collection...');
         await Task.deleteMany({}); // Clear the tasks collection before each test
     });
 
@@ -16,11 +26,11 @@ describe('Task API', () => {
 
     // Test POST a new task
     it('should create a new task', async () => {
-        const newTask = { title: 'Test Task' };
+        const newTask = { title: 'Test Task' }; // Ensure 'title' matches the model
         const response = await request(app)
             .post('/tasks')
             .send(newTask);
-        
+
         expect(response.statusCode).toBe(201);
         expect(response.body.title).toBe(newTask.title);
         expect(response.body.completed).toBe(false); // Default value
@@ -35,7 +45,7 @@ describe('Task API', () => {
         const response = await request(app)
             .put(`/tasks/${task._id}`)
             .send(updatedData);
-        
+
         expect(response.statusCode).toBe(200);
         expect(response.body.title).toBe(updatedData.title);
         expect(response.body.completed).toBe(updatedData.completed);
@@ -47,10 +57,10 @@ describe('Task API', () => {
         await task.save(); // Save the initial task
 
         const response = await request(app).delete(`/tasks/${task._id}`);
-        
+
         expect(response.statusCode).toBe(200);
-        expect(response.body.message).toBe('Task deleted successfully');
-        
+        expect(response.body.message).toBe('Task deleted successfully'); // Ensure this message is returned
+
         // Check that the task is deleted
         const deletedTask = await Task.findById(task._id);
         expect(deletedTask).toBeNull(); // Expect the task to be null

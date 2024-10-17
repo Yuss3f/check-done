@@ -22,11 +22,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // Task model
 const TaskSchema = new mongoose.Schema({
-  text: { type: String, required: true },
+  title: { type: String, required: true }, // Ensure field is 'title' for consistency
   completed: { type: Boolean, default: false }
 });
 
-const Task = mongoose.model("Task", TaskSchema);
+// Check if the model already exists, if not, create it
+const Task = mongoose.models.Task || mongoose.model("Task", TaskSchema);
 
 // Routes
 app.get("/tasks", async (req, res) => {
@@ -48,13 +49,27 @@ app.post("/tasks", async (req, res) => {
   }
 });
 
+// Add PUT route to update a task
+app.put("/tasks/:id", async (req, res) => {
+  try {
+    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedTask) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+    res.json(updatedTask);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Delete a task
 app.delete("/tasks/:id", async (req, res) => {
   try {
     const deletedTask = await Task.findByIdAndDelete(req.params.id);
     if (!deletedTask) {
       return res.status(404).json({ error: "Task not found" });
     }
-    res.json(deletedTask);
+    res.json({ message: "Task deleted successfully", deletedTask });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

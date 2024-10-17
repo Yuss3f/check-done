@@ -1,17 +1,12 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-// Define the schema for tasks
 const TaskSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true,   // Task title is required
-    },
-    completed: {
-        type: Boolean,
-        default: false,   // By default, a task is not completed
-    }
-}, { timestamps: true });  // Automatically add createdAt and updatedAt timestamps
+  title: { type: String, required: true },
+  completed: { type: Boolean, default: false }
+});
 
-// Export the Task model, based on the TaskSchema
-module.exports = mongoose.model('Task', TaskSchema);
+// Check if the model already exists
+const Task = mongoose.models.Task || mongoose.model("Task", TaskSchema);
+
+module.exports = Task; // Export the Task model
 
