@@ -7,9 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
   loadTasks();
 
   // Add Task
-  addTaskBtn.addEventListener("click", async function () {
+  async function addTaskHandler() {
     const taskText = taskInput.value.trim();
-
     if (taskText !== "") {
       const newTask = { text: taskText, completed: false };
       await addTaskToServer(newTask); // Send task to server
@@ -17,17 +16,17 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       console.error("Task input is empty");
     }
+  }
+
+  // Add task when clicking the button
+  addTaskBtn.addEventListener("click", addTaskHandler);
+
+  // Add task when pressing the Enter key
+  taskInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") { // Check if the key pressed is "Enter"
+      addTaskHandler(); // Call the function to add the task
+    }
   });
-
-   // Add task when clicking the button
-   addTaskBtn.addEventListener("click", addTaskHandler);
-
-   // Add task when pressing the Enter key
-   taskInput.addEventListener("keydown", function (event) {
-     if (event.key === "Enter") { // Check if the key pressed is "Enter"
-       addTaskHandler(); // Call the function to add the task
-     }
-   });
 
   // Load tasks from the server
   async function loadTasks() {
@@ -88,8 +87,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!response.ok) {
         throw new Error("Failed to add task");
       }
-      const addedTask = await response.json();
-      addTask(addedTask.text, addedTask.completed);
     } catch (error) {
       console.error("Error adding task:", error);
     }
@@ -121,4 +118,3 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
-
