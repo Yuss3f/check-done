@@ -87,6 +87,8 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!response.ok) {
         throw new Error("Failed to add task");
       }
+      const savedTask = await response.json();
+      addTask(savedTask.text, savedTask.completed);
     } catch (error) {
       console.error("Error adding task:", error);
     }
