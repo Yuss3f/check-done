@@ -19,6 +19,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+   // Add task when clicking the button
+   addTaskBtn.addEventListener("click", addTaskHandler);
+
+   // Add task when pressing the Enter key
+   taskInput.addEventListener("keydown", function (event) {
+     if (event.key === "Enter") { // Check if the key pressed is "Enter"
+       addTaskHandler(); // Call the function to add the task
+     }
+   });
+
   // Load tasks from the server
   async function loadTasks() {
     try {
