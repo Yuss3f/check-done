@@ -6,7 +6,10 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #f3f4f6;
+  background-image: url('https://drive.google.com/uc?export=view&id=145nxKvLh8dpaVB61IY9FywJZDR9uwQWx');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: #333;
   display: flex;
   justify-content: center;
@@ -15,7 +18,7 @@ body {
 }
 
 .container {
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent */
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -83,4 +86,3 @@ button.delete-btn {
   padding: 5px;
   cursor: pointer;
 }
-
