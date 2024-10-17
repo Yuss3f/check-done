@@ -22,7 +22,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // Task model
 const TaskSchema = new mongoose.Schema({
-  title: { type: String, required: true }, // Ensure field is 'title' for consistency
+  text: { type: String, required: true },
   completed: { type: Boolean, default: false }
 });
 
