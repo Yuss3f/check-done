@@ -14,16 +14,25 @@ document.addEventListener("DOMContentLoaded", function () {
       const newTask = { text: taskText, completed: false };
       await addTaskToServer(newTask); // Send task to server
       taskInput.value = ""; // Clear the input field
+    } else {
+      console.error("Task input is empty");
     }
   });
 
   // Load tasks from the server
   async function loadTasks() {
-    const response = await fetch("http://localhost:5000/tasks");
-    const tasks = await response.json();
-    tasks.forEach(task => {
-      addTask(task.text, task.completed);
-    });
+    try {
+      const response = await fetch("http://localhost:5000/tasks");
+      if (!response.ok) {
+        throw new Error("Failed to load tasks");
+      }
+      const tasks = await response.json();
+      tasks.forEach(task => {
+        addTask(task.text, task.completed);
+      });
+    } catch (error) {
+      console.error("Error loading tasks:", error);
+    }
   }
 
   // Add Task to the DOM
@@ -58,25 +67,45 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Function to add task to the server
   async function addTaskToServer(task) {
-    await fetch("http://localhost:5000/tasks", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(task)
-    });
+    try {
+      const response = await fetch("http://localhost:5000/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(task)
+      });
+      if (!response.ok) {
+        throw new Error("Failed to add task");
+      }
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
   }
 
   // Function to delete task from the server
   async function deleteTaskFromServer(taskText) {
-    const tasks = await fetch("http://localhost:5000/tasks");
-    const allTasks = await tasks.json();
-    const taskToDelete = allTasks.find(task => task.text === taskText);
+    try {
+      const response = await fetch("http://localhost:5000/tasks");
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks for deletion");
+      }
 
-    if (taskToDelete) {
-      await fetch(`http://localhost:5000/tasks/${taskToDelete._id}`, {
-        method: "DELETE"
-      });
+      const allTasks = await response.json();
+      const taskToDelete = allTasks.find(task => task.text === taskText);
+
+      if (taskToDelete) {
+        const deleteResponse = await fetch(`http://localhost:5000/tasks/${taskToDelete._id}`, {
+          method: "DELETE"
+        });
+        if (!deleteResponse.ok) {
+          throw new Error("Failed to delete task");
+        }
+      } else {
+        console.error("Task not found for deletion");
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error);
     }
   }
 });
