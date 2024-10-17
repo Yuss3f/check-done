@@ -51,17 +51,27 @@ app.post("/tasks", async (req, res) => {
 app.delete("/tasks/:id", async (req, res) => {
   try {
     const deletedTask = await Task.findByIdAndDelete(req.params.id);
+    if (!deletedTask) {
+      return res.status(404).json({ error: "Task not found" });
+    }
     res.json(deletedTask);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Root route
 app.get("/", (req, res) => {
   res.send("Server is running!");
 });
+
+// Export the app for testing
+module.exports = app;
+
+// Start the server if this file is executed directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
