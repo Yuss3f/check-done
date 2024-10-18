@@ -1,5 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const session = require('express-session');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const User = require('./models/User'); // Path to user model
 const cors = require("cors");
 require("dotenv").config();
 
@@ -9,6 +13,46 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(session({
+  secret: 'yourSecretKey',
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Initialize Passport.js
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(
+  async (username, password, done) => {
+    try {
+      const user = await User.findOne({ username });
+      if (!user) return done(null, false, { message: 'Incorrect username.' });
+      
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) return done(null, false, { message: 'Incorrect password.' });
+      
+      return done(null, user);
+    } catch (err) {
+      return done(err);
+    }
+  }
+));
+
+// Serialize user
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+// Deserialize user
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
@@ -20,6 +64,29 @@ mongoose.connect(process.env.MONGODB_URI, {
   console.error("MongoDB connection error:", err);
 });
 
+// Registration route
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  const newUser = new User({ username, password });
+
+  try {
+    await newUser.save();
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Login route
+app.post('/login', passport.authenticate('local'), (req, res) => {
+  res.json({ message: 'Login successful', user: req.user });
+});
+
+// Logout route
+app.post('/logout', (req, res) => {
+  req.logout();
+  res.json({ message: 'Logged out successfully' });
+});
 
 // Task model
 const TaskSchema = new mongoose.Schema({
