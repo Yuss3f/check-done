@@ -38,7 +38,7 @@ const User = require('./models/User');
 passport.use(new LocalStrategy(
   async (username, password, done) => {
     try {
-      const user = await User.findOne({ username });
+      const user = await User.findOne({ username: username.trim() });  // Ensure username is trimmed
       if (!user) {
         console.log("User not found with username:", username);  // Debugging
         return done(null, false, { message: 'Incorrect username.' });
@@ -48,7 +48,7 @@ passport.use(new LocalStrategy(
       console.log("Password stored in DB for user:", username, "->", user.password);
 
       // Compare the provided password with the hashed password in the database
-      const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = await bcrypt.compare(password.trim(), user.password);  // Ensure password is trimmed
       console.log("Password match result for user:", username, "->", isMatch);  // Debugging
 
       if (!isMatch) {
@@ -92,23 +92,32 @@ app.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Log request data for debugging purposes
     console.log("Registering user:", username);
 
-    // Hash password before saving to database
-    const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
-    console.log("Hashed password for user:", username, "->", hashedPassword);  // Debugging
+    // Hash password once
+    const hashedPassword = await bcrypt.hash(password.trim(), 10);
 
+    // Check if user already exists to avoid duplicates
+    const existingUser = await User.findOne({ username: username.trim() });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    // Save the new user
     const newUser = new User({
-      username,
+      username: username.trim(),
       password: hashedPassword
     });
 
     await newUser.save();
+
+    // Log the hashed password for debugging purposes
+    console.log("Hashed password for user:", username, "->", hashedPassword);
     res.status(201).json({ message: 'User registered successfully' });
+
   } catch (err) {
     console.error("Registration error:", err);
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
