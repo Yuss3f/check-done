@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require('bcrypt');  // Corrected to use bcrypt instead of bcryptjs
+const bcrypt = require('bcrypt');  // Using bcrypt for hashing passwords
 const cors = require("cors");
 require("dotenv").config();
 
@@ -40,17 +40,21 @@ passport.use(new LocalStrategy(
     try {
       const user = await User.findOne({ username });
       if (!user) {
+        console.log("User not found with username:", username);  // Debugging
         return done(null, false, { message: 'Incorrect username.' });
       }
 
       // Compare the provided password with the hashed password in the database
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
+        console.log("Password incorrect for user:", username);  // Debugging
         return done(null, false, { message: 'Incorrect password.' });
       }
 
+      console.log("User authenticated successfully:", username);  // Debugging
       return done(null, user);
     } catch (err) {
+      console.error("Error in LocalStrategy:", err);  // Debugging
       return done(err);
     }
   }
@@ -106,6 +110,7 @@ app.post('/register', async (req, res) => {
 
 // Login Route
 app.post('/login', passport.authenticate('local'), (req, res) => {
+  console.log("Login successful for user:", req.user.username);  // Debugging
   res.json({ message: 'Login successful', user: req.user });
 });
 
@@ -134,6 +139,7 @@ app.get("/tasks", (req, res) => {
       .then(tasks => res.json(tasks))
       .catch(err => res.status(500).json({ error: err.message }));
   } else {
+    console.log("Unauthorized access to /tasks");
     res.status(401).json({ error: 'Unauthorized' });
   }
 });
@@ -146,6 +152,7 @@ app.post("/tasks", (req, res) => {
       .then(task => res.status(201).json(task))
       .catch(err => res.status(400).json({ error: err.message }));
   } else {
+    console.log("Unauthorized attempt to create task");
     res.status(401).json({ error: 'Unauthorized' });
   }
 });
@@ -162,6 +169,7 @@ app.put("/tasks/:id", (req, res) => {
       })
       .catch(err => res.status(400).json({ error: err.message }));
   } else {
+    console.log("Unauthorized attempt to update task");
     res.status(401).json({ error: 'Unauthorized' });
   }
 });
@@ -178,6 +186,7 @@ app.delete("/tasks/:id", (req, res) => {
       })
       .catch(err => res.status(400).json({ error: err.message }));
   } else {
+    console.log("Unauthorized attempt to delete task");
     res.status(401).json({ error: 'Unauthorized' });
   }
 });
@@ -185,6 +194,15 @@ app.delete("/tasks/:id", (req, res) => {
 // Root route
 app.get("/", (req, res) => {
   res.send("Server is running!");
+});
+
+// Route to check authentication status
+app.get('/auth-status', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ authenticated: true, user: req.user });
+  } else {
+    res.json({ authenticated: false });
+  }
 });
 
 // Export the app for testing
@@ -196,11 +214,3 @@ if (require.main === module) {
     console.log(`Server is running on port ${PORT}`);
   });
 }
-// Route to check authentication status
-app.get('/auth-status', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({ authenticated: true, user: req.user });
-  } else {
-    res.json({ authenticated: false });
-  }
-});
