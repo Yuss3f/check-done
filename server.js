@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require('bcrypt');  // Corrected to use bcrypt instead of bcryptjs
+const bcrypt = require('bcrypt');
 const cors = require("cors");
 require("dotenv").config();
 
@@ -12,13 +12,25 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+
+// Configure CORS to allow credentials and your frontend's origin
+app.use(cors({
+  origin: 'http://127.0.0.1:5000',  // Use your frontend origin (or localhost if same)
+  credentials: true  // Allow cookies to be sent
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Session configuration
 app.use(session({
   secret: 'yourSecretKey',  // Change this to a more secure key
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    secure: false,  // Set to true if using HTTPS
+    httpOnly: true, // Security measure to prevent XSS attacks
+  }
 }));
 
 // Serve static files (e.g., HTML, CSS, JS) from the 'public' directory
@@ -28,7 +40,7 @@ app.use(express.static('public'));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// User Model (Make sure the User model file is correct and imported)
+// User Model
 const User = require('./models/User');
 
 // LocalStrategy for Passport
