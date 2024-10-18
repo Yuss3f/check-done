@@ -122,8 +122,26 @@ app.post('/register', async (req, res) => {
 });
 
 // Login Route
-app.post('/login', passport.authenticate('local'), (req, res) => {
-  res.json({ message: 'Login successful', user: req.user });
+app.post('/login', async (req, res, next) => {
+  console.log("Attempting login for user:", req.body.username); // Debugging log
+
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      console.error("Authentication error:", err); // Log any errors during authentication
+      return next(err);
+    }
+    if (!user) {
+      console.log("Login failed:", info.message); // Log failure reasons
+      return res.status(401).json({ error: info.message }); // Unauthorized if user not found
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        console.error("Error during session login:", err); // Log errors during session login
+        return next(err);
+      }
+      return res.json({ message: 'Login successful', user: req.user });
+    });
+  })(req, res, next);
 });
 
 // Logout Route
