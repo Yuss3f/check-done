@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');  // Corrected to use bcrypt instead of bcryptjs
 const cors = require("cors");
 require("dotenv").config();
 
@@ -12,25 +12,16 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-
-// Configure CORS to allow credentials and your frontend's origin
 app.use(cors({
-  origin: 'http://127.0.0.1:5000',  // Use your frontend origin (or localhost if same)
-  credentials: true  // Allow cookies to be sent
+  origin: "http://localhost:3000",  // Adjust this to match your frontend URL
+  credentials: true  // Allow credentials (like cookies) to be sent
 }));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Session configuration
 app.use(session({
   secret: 'yourSecretKey',  // Change this to a more secure key
   resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false,  // Set to true if using HTTPS
-    httpOnly: true, // Security measure to prevent XSS attacks
-  }
+  saveUninitialized: false
 }));
 
 // Serve static files (e.g., HTML, CSS, JS) from the 'public' directory
@@ -40,7 +31,7 @@ app.use(express.static('public'));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// User Model
+// User Model (Make sure the User model file is correct and imported)
 const User = require('./models/User');
 
 // LocalStrategy for Passport
@@ -94,6 +85,9 @@ app.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
   try {
+    // Log request data for debugging purposes
+    console.log("Registering user:", username);
+
     // Hash password before saving to database
     const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
 
@@ -105,6 +99,7 @@ app.post('/register', async (req, res) => {
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
+    console.error("Registration error:", err);
     res.status(400).json({ error: err.message });
   }
 });
@@ -201,3 +196,11 @@ if (require.main === module) {
     console.log(`Server is running on port ${PORT}`);
   });
 }
+// Route to check authentication status
+app.get('/auth-status', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ authenticated: true, user: req.user });
+  } else {
+    res.json({ authenticated: false });
+  }
+});
