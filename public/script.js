@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const addTaskBtn = document.getElementById("add-task-btn");
   const taskList = document.getElementById("task-list");
 
-  // Load tasks from the server
+  // Load tasks from the server when DOM is loaded
   loadTasks();
 
   // Add Task
@@ -11,8 +11,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const taskText = taskInput.value.trim();
     if (taskText !== "") {
       const newTask = { text: taskText, completed: false };
-      await addTaskToServer(newTask); // Send task to server
-      taskInput.value = ""; // Clear the input field
+      try {
+        await addTaskToServer(newTask); // Send task to server
+        taskInput.value = ""; // Clear the input field
+      } catch (error) {
+        console.error("Error adding task:", error);
+      }
     } else {
       console.error("Task input is empty");
     }
@@ -31,8 +35,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Load tasks from the server
   async function loadTasks() {
     try {
-      const response = await fetch("http://localhost:5000/tasks");
+      const response = await fetch("http://localhost:5000/tasks", {
+        method: "GET",
+        credentials: "include"  // Include cookies for authentication
+      });
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Unauthorized. Please log in.");
+        }
         throw new Error("Failed to load tasks");
       }
       const tasks = await response.json();
@@ -41,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     } catch (error) {
       console.error("Error loading tasks:", error);
+      alert("Error loading tasks. You might not be logged in.");
     }
   }
 
@@ -64,7 +75,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Mark task as completed
     taskSpan.addEventListener("click", function () {
       listItem.classList.toggle("completed");
-      // You can add a function to update task completion status here
+      // Update task completion status on the server
+      updateTaskStatus(taskText, listItem.classList.contains("completed"));
     });
 
     // Delete task
@@ -82,23 +94,34 @@ document.addEventListener("DOMContentLoaded", function () {
         headers: {
           "Content-Type": "application/json"
         },
+        credentials: "include",  // Include cookies for authentication
         body: JSON.stringify(task)
       });
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Unauthorized. Please log in.");
+        }
         throw new Error("Failed to add task");
       }
       const savedTask = await response.json();
-      addTask(savedTask.text, savedTask.completed);
+      addTask(savedTask.text, savedTask.completed); // Add the new task to the DOM
     } catch (error) {
       console.error("Error adding task:", error);
+      alert("Error adding task. Make sure you are logged in.");
     }
   }
 
   // Function to delete task from the server
   async function deleteTaskFromServer(taskText) {
     try {
-      const response = await fetch("http://localhost:5000/tasks");
+      const response = await fetch("http://localhost:5000/tasks", {
+        method: "GET",
+        credentials: "include"  // Include cookies for authentication
+      });
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Unauthorized. Please log in.");
+        }
         throw new Error("Failed to fetch tasks for deletion");
       }
 
@@ -107,9 +130,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (taskToDelete) {
         const deleteResponse = await fetch(`http://localhost:5000/tasks/${taskToDelete._id}`, {
-          method: "DELETE"
+          method: "DELETE",
+          credentials: "include"  // Include cookies for authentication
         });
         if (!deleteResponse.ok) {
+          if (deleteResponse.status === 401) {
+            throw new Error("Unauthorized. Please log in.");
+          }
           throw new Error("Failed to delete task");
         }
       } else {
@@ -117,6 +144,41 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     } catch (error) {
       console.error("Error deleting task:", error);
+      alert("Error deleting task. Make sure you are logged in.");
+    }
+  }
+
+  // Function to update task completion status
+  async function updateTaskStatus(taskText, isCompleted) {
+    try {
+      const response = await fetch("http://localhost:5000/tasks", {
+        method: "GET",
+        credentials: "include"  // Include cookies for authentication
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks for updating status");
+      }
+
+      const allTasks = await response.json();
+      const taskToUpdate = allTasks.find(task => task.text === taskText);
+
+      if (taskToUpdate) {
+        const updateResponse = await fetch(`http://localhost:5000/tasks/${taskToUpdate._id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include",  // Include cookies for authentication
+          body: JSON.stringify({ completed: isCompleted })
+        });
+        if (!updateResponse.ok) {
+          throw new Error("Failed to update task status");
+        }
+      } else {
+        console.error("Task not found for updating status");
+      }
+    } catch (error) {
+      console.error("Error updating task status:", error);
     }
   }
 });
