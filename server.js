@@ -21,12 +21,15 @@ app.use(session({
   saveUninitialized: false
 }));
 
+// Serve static files (e.g., HTML, CSS, JS) from the 'public' directory
+app.use(express.static('public'));
+
 // Initialize Passport.js
 app.use(passport.initialize());
 app.use(passport.session());
 
 // User Model (Make sure the User model file is correct and imported)
-const User = require('./models/User'); 
+const User = require('./models/User');
 
 // LocalStrategy for Passport
 passport.use(new LocalStrategy(
@@ -113,7 +116,6 @@ const TaskSchema = new mongoose.Schema({
   completed: { type: Boolean, default: false }
 });
 
-// Check if the model already exists, if not, create it
 const Task = mongoose.models.Task || mongoose.model("Task", TaskSchema);
 
 // Task Routes
@@ -186,4 +188,4 @@ if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
-}
+});
