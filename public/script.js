@@ -3,8 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const addTaskBtn = document.getElementById("add-task-btn");
   const taskList = document.getElementById("task-list");
 
-  // Load tasks from the server when DOM is loaded
-  loadTasks();
+  // Check authentication status and load tasks when DOM is loaded
+  checkAuthStatus();
 
   // Add Task
   async function addTaskHandler() {
@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function deleteTaskFromServer(taskText) {
     try {
       const response = await fetch("http://localhost:5000/tasks", {
-        method: "GET",
+        method: "GET", // This is the problematic line
         credentials: "include"
       });
       if (!response.ok) {
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (taskToDelete) {
         const deleteResponse = await fetch(`http://localhost:5000/tasks/${taskToDelete._id}`, {
-          method: "DELETE",
+          method: "DELETE", // Ensure using DELETE
           credentials: "include"
         });
         if (!deleteResponse.ok) {
@@ -181,22 +181,22 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Error updating task status:", error);
     }
   }
-});
 
-// Function to check if user is authenticated
-async function checkAuthStatus() {
-  try {
-    const response = await fetch('http://localhost:5000/auth-status', {
-      method: 'GET',
-      credentials: 'include' // Include credentials to check session
-    });
-    const authStatus = await response.json();
-    if (authStatus.authenticated) {
-      loadTasks(); // If authenticated, load tasks
-    } else {
-      console.log('You might not be logged in. Please log in to see your tasks.');
+  // Function to check if user is authenticated
+  async function checkAuthStatus() {
+    try {
+      const response = await fetch('http://localhost:5000/auth-status', {
+        method: 'GET',
+        credentials: 'include' // Include credentials to check session
+      });
+      const authStatus = await response.json();
+      if (authStatus.authenticated) {
+        loadTasks(); // If authenticated, load tasks
+      } else {
+        alert('You might not be logged in. Please log in to see your tasks.');
+      }
+    } catch (error) {
+      console.error('Error checking authentication status:', error);
     }
-  } catch (error) {
-    console.error('Error checking authentication status:', error);
   }
-}
+});
