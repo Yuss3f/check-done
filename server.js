@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require('bcrypt');  // Correct bcrypt import
+const bcrypt = require('bcrypt'); // Correct bcrypt import
 const cors = require("cors");
 require("dotenv").config();
 
@@ -13,13 +13,13 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ["http://localhost:3000", "http://127.0.0.1:5500"],  // Allow both origins
-  credentials: true  // Allow credentials (like cookies) to be sent
+  origin: ["http://localhost:5000", "http://127.0.0.1:5500"], // Allow both origins
+  credentials: true // Allow credentials (like cookies) to be sent
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
-  secret: 'yourSecretKey',  // Change this to a more secure key
+  secret: 'yourSecretKey', // Change this to a more secure key
   resave: false,
   saveUninitialized: false
 }));
@@ -34,21 +34,21 @@ app.use(passport.session());
 // User Model (Ensure the User model file is correct and imported)
 const User = require('./models/User');
 
-// Hardcoded user for testing
-const hardcodedUser = {
-  username: 'testuser',
-  password: bcrypt.hashSync('testpassword', 10) // Hash the test password
-};
-
 // LocalStrategy for Passport
 passport.use(new LocalStrategy(
   async (username, password, done) => {
     try {
+      // Hardcoded values for testing
+      const hardcodedUser = {
+        username: 'testuser',
+        password: await bcrypt.hash('testpassword', 10) // Hash the test password
+      };
+
       // Check if the provided username matches the hardcoded username
       if (username.trim() === hardcodedUser.username) {
         // Compare the provided password with the hardcoded hashed password
         const isMatch = await bcrypt.compare(password.trim(), hardcodedUser.password);
-        console.log("Password match result for user:", username, "->", isMatch);  // Log match result
+        console.log("Password match result for user:", username, "->", isMatch); // Log match result
 
         if (isMatch) {
           return done(null, hardcodedUser); // Return the hardcoded user if the password matches
@@ -59,7 +59,7 @@ passport.use(new LocalStrategy(
         return done(null, false, { message: 'Incorrect username.' });
       }
     } catch (err) {
-      console.error("Error in LocalStrategy:", err);  // Debugging
+      console.error("Error in LocalStrategy:", err); // Debugging
       return done(err);
     }
   }
@@ -72,8 +72,8 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((username, done) => {
   // Find user by username in hardcoded values
-  if (username === hardcodedUser.username) {
-    done(null, { username: hardcodedUser.username });
+  if (username === 'testuser') {
+    done(null, { username: 'testuser' });
   } else {
     done(null, false);
   }

@@ -182,3 +182,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
+
+// Function to check if user is authenticated
+async function checkAuthStatus() {
+  try {
+    const response = await fetch('http://localhost:5000/auth-status', {
+      method: 'GET',
+      credentials: 'include' // Include credentials to check session
+    });
+    const authStatus = await response.json();
+    if (authStatus.authenticated) {
+      loadTasks(); // If authenticated, load tasks
+    } else {
+      console.log('You might not be logged in. Please log in to see your tasks.');
+    }
+  } catch (error) {
+    console.error('Error checking authentication status:', error);
+  }
+}
