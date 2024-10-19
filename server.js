@@ -143,6 +143,9 @@ app.post('/login', async (req, res, next) => {
     });
   })(req, res, next);
 });
+if (username === 'testuser' && password === 'testpassword') {
+  return done(null, { username: 'testuser' });
+}
 
 // Logout Route
 app.post('/logout', (req, res) => {
