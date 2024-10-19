@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Load tasks from the server
   async function loadTasks() {
     try {
-      const response = await fetch("http://127.0.0.1:5500/tasks", {
+      const response = await fetch("http://localhost:5000/tasks", {
         method: "GET",
         credentials: "include"  // Include cookies for authentication
       });
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to add task to the server
   async function addTaskToServer(task) {
     try {
-      const response = await fetch("http://127.0.0.1:5500/tasks", {
+      const response = await fetch("http://localhost:5000/tasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to delete task from the server
   async function deleteTaskFromServer(taskText) {
     try {
-      const response = await fetch("http://127.0.0.1:5500/tasks", {
+      const response = await fetch("http://localhost:5000/tasks", {
         method: "GET",
         credentials: "include"
       });
@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const taskToDelete = allTasks.find(task => task.text === taskText);
 
       if (taskToDelete) {
-        const deleteResponse = await fetch(`http://127.0.0.1:5500/tasks/${taskToDelete._id}`, {
+        const deleteResponse = await fetch(`http://localhost:5000/tasks/${taskToDelete._id}`, {
           method: "DELETE",
           credentials: "include"
         });
@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to update task completion status
   async function updateTaskStatus(taskText, isCompleted) {
     try {
-      const response = await fetch("http://127.0.0.1:5500/tasks", {
+      const response = await fetch("http://localhost:5000/tasks", {
         method: "GET",
         credentials: "include"
       });
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const taskToUpdate = allTasks.find(task => task.text === taskText);
 
       if (taskToUpdate) {
-        const updateResponse = await fetch(`http://127.0.0.1:5500/tasks/${taskToUpdate._id}`, {
+        const updateResponse = await fetch(`http://localhost:5000/tasks/${taskToUpdate._id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json"
