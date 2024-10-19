@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ["http://localhost:5000", "http://127.0.0.1:5500"], // Allow both origins
+  origin: "http://127.0.0.1:5500", // Allow both origins
   credentials: true // Allow credentials (like cookies) to be sent
 }));
 app.use(express.json());
@@ -21,8 +21,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({
   secret: 'yourSecretKey', // Change this to a more secure key
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // Set to true if using HTTPS (not needed for localhost)
+    maxAge: 1000 * 60 * 60 * 24 // 1 day
+  }
 }));
+
 
 // Serve static files (e.g., HTML, CSS, JS) from the 'public' directory
 app.use(express.static('public'));
