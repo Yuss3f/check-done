@@ -27,8 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Add task when pressing the Enter key
   taskInput.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") { // Check if the key pressed is "Enter"
-      addTaskHandler(); // Call the function to add the task
+    if (event.key === "Enter") {
+      addTaskHandler();
     }
   });
 
@@ -41,7 +41,8 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error("Unauthorized. Please log in.");
+          alert("You might not be logged in. Please log in to see your tasks.");
+          return;
         }
         throw new Error("Failed to load tasks");
       }
@@ -51,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     } catch (error) {
       console.error("Error loading tasks:", error);
-      alert("Error loading tasks. You might not be logged in.");
+      alert("Error loading tasks. Please try again later.");
     }
   }
 
@@ -75,13 +76,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // Mark task as completed
     taskSpan.addEventListener("click", function () {
       listItem.classList.toggle("completed");
-      // Update task completion status on the server
       updateTaskStatus(taskText, listItem.classList.contains("completed"));
     });
 
     // Delete task
     deleteBtn.addEventListener("click", async function () {
-      await deleteTaskFromServer(taskText); // Call delete API
+      await deleteTaskFromServer(taskText);
       taskList.removeChild(listItem);
     });
   }
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
         headers: {
           "Content-Type": "application/json"
         },
-        credentials: "include",  // Include cookies for authentication
+        credentials: "include",
         body: JSON.stringify(task)
       });
       if (!response.ok) {
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
         throw new Error("Failed to add task");
       }
       const savedTask = await response.json();
-      addTask(savedTask.text, savedTask.completed); // Add the new task to the DOM
+      addTask(savedTask.text, savedTask.completed);
     } catch (error) {
       console.error("Error adding task:", error);
       alert("Error adding task. Make sure you are logged in.");
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const response = await fetch("http://localhost:5000/tasks", {
         method: "GET",
-        credentials: "include"  // Include cookies for authentication
+        credentials: "include"
       });
       if (!response.ok) {
         if (response.status === 401) {
@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (taskToDelete) {
         const deleteResponse = await fetch(`http://localhost:5000/tasks/${taskToDelete._id}`, {
           method: "DELETE",
-          credentials: "include"  // Include cookies for authentication
+          credentials: "include"
         });
         if (!deleteResponse.ok) {
           if (deleteResponse.status === 401) {
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const response = await fetch("http://localhost:5000/tasks", {
         method: "GET",
-        credentials: "include"  // Include cookies for authentication
+        credentials: "include"
       });
       if (!response.ok) {
         throw new Error("Failed to fetch tasks for updating status");
@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
           headers: {
             "Content-Type": "application/json"
           },
-          credentials: "include",  // Include cookies for authentication
+          credentials: "include",
           body: JSON.stringify({ completed: isCompleted })
         });
         if (!updateResponse.ok) {

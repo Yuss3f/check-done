@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ["http://localhost:5000", "http://127.0.0.1:5500"],  // Allow both origins
+  origin: ["http://localhost:3000", "http://127.0.0.1:5500"],  // Allow both origins
   credentials: true  // Allow credentials (like cookies) to be sent
 }));
 app.use(express.json());
@@ -34,16 +34,16 @@ app.use(passport.session());
 // User Model (Ensure the User model file is correct and imported)
 const User = require('./models/User');
 
+// Hardcoded user for testing
+const hardcodedUser = {
+  username: 'testuser',
+  password: bcrypt.hashSync('testpassword', 10) // Hash the test password
+};
+
 // LocalStrategy for Passport
 passport.use(new LocalStrategy(
   async (username, password, done) => {
     try {
-      // Hardcoded values for testing
-      const hardcodedUser = {
-        username: 'testuser',
-        password: await bcrypt.hash('testpassword', 10) // Hash the test password
-      };
-
       // Check if the provided username matches the hardcoded username
       if (username.trim() === hardcodedUser.username) {
         // Compare the provided password with the hardcoded hashed password
@@ -72,8 +72,8 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((username, done) => {
   // Find user by username in hardcoded values
-  if (username === 'testuser') {
-    done(null, { username: 'testuser' });
+  if (username === hardcodedUser.username) {
+    done(null, { username: hardcodedUser.username });
   } else {
     done(null, false);
   }
