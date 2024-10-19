@@ -38,24 +38,26 @@ const User = require('./models/User');
 passport.use(new LocalStrategy(
   async (username, password, done) => {
     try {
-      const user = await User.findOne({ username: username.trim() });  // Ensure username is trimmed
-      if (!user) {
-        console.log("User not found with username:", username);  // Debugging
+      // Hardcoded values for testing
+      const hardcodedUser = {
+        username: 'testuser',
+        password: await bcrypt.hash('testpassword', 10) // Hash the test password
+      };
+
+      // Check if the provided username matches the hardcoded username
+      if (username.trim() === hardcodedUser.username) {
+        // Compare the provided password with the hardcoded hashed password
+        const isMatch = await bcrypt.compare(password.trim(), hardcodedUser.password);
+        console.log("Password match result for user:", username, "->", isMatch);  // Log match result
+
+        if (isMatch) {
+          return done(null, hardcodedUser); // Return the hardcoded user if the password matches
+        } else {
+          return done(null, false, { message: 'Incorrect password.' });
+        }
+      } else {
         return done(null, false, { message: 'Incorrect username.' });
       }
-
-      // Log stored password from database for debugging
-      console.log("Password stored in DB for user:", username, "->", user.password);
-
-      // Compare the provided password with the hashed password in the database
-      const isMatch = await bcrypt.compare(password.trim(), user.password);  // Ensure password is trimmed
-      console.log("Password match result for user:", username, "->", isMatch);  // Debugging
-
-      if (!isMatch) {
-        return done(null, false, { message: 'Incorrect password.' });
-      }
-
-      return done(null, user);
     } catch (err) {
       console.error("Error in LocalStrategy:", err);  // Debugging
       return done(err);
@@ -65,15 +67,15 @@ passport.use(new LocalStrategy(
 
 // Passport session setup
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  done(null, user.username); // Use username for session
 });
 
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (err) {
-    done(err);
+passport.deserializeUser((username, done) => {
+  // Find user by username in hardcoded values
+  if (username === 'testuser') {
+    done(null, { username: 'testuser' });
+  } else {
+    done(null, false);
   }
 });
 
@@ -122,30 +124,9 @@ app.post('/register', async (req, res) => {
 });
 
 // Login Route
-app.post('/login', async (req, res, next) => {
-  console.log("Attempting login for user:", req.body.username); // Debugging log
-
-  passport.authenticate('local', (err, user, info) => {
-    if (err) {
-      console.error("Authentication error:", err); // Log any errors during authentication
-      return next(err);
-    }
-    if (!user) {
-      console.log("Login failed:", info.message); // Log failure reasons
-      return res.status(401).json({ error: info.message }); // Unauthorized if user not found
-    }
-    req.logIn(user, (err) => {
-      if (err) {
-        console.error("Error during session login:", err); // Log errors during session login
-        return next(err);
-      }
-      return res.json({ message: 'Login successful', user: req.user });
-    });
-  })(req, res, next);
+app.post('/login', passport.authenticate('local'), (req, res) => {
+  res.json({ message: 'Login successful', user: req.user });
 });
-if (username === 'testuser' && password === 'testpassword') {
-  return done(null, { username: 'testuser' });
-}
 
 // Logout Route
 app.post('/logout', (req, res) => {
