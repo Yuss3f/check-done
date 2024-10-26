@@ -6,10 +6,7 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background-image: url('https://drive.google.com/uc?id=145nxKvLh8dpaVB61IY9FywJZDR9uwQWx');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: #f0fff4; /* Very light green background */
   color: #333;
   display: flex;
   justify-content: center;
