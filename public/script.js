@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function deleteTaskFromServer(taskText) {
     try {
       const response = await fetch("http://localhost:5000/tasks", {
-        method: "GET", // This is the problematic line
+        method: "GET",
         credentials: "include"
       });
       if (!response.ok) {
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (taskToDelete) {
         const deleteResponse = await fetch(`http://localhost:5000/tasks/${taskToDelete._id}`, {
-          method: "DELETE", // Ensure using DELETE
+          method: "DELETE",
           credentials: "include"
         });
         if (!deleteResponse.ok) {
