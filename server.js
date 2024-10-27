@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware setup
 app.use(cors({
-  origin: "http://127.0.0.1:5500", // Allow your frontend origin
+  origin: ["http://127.0.0.1:5500", "http://localhost:5500"], // Allow both versions of the URL
   credentials: true                // Allow credentials (cookies) to be shared
 }));
 app.use(express.json());
@@ -26,11 +26,18 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,                 // Prevents JavaScript from accessing the cookie
-    secure: false,                  // False since you're using HTTP (not HTTPS locally)
+    secure: false,                  
     sameSite: 'lax',                // Prevents CSRF attacks (allows cookies with top-level navigation)
     maxAge: 1000 * 60 * 60 * 24     // Expiration time set for 1 day
   }
 }));
+
+// Add middleware to log cookie information for debugging
+app.use((req, res, next) => {
+  console.log("Cookies on request:", req.headers.cookie);
+  console.log("Session ID:", req.sessionID);
+  next();
+});
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -139,8 +146,8 @@ app.post('/login', (req, res, next) => {
     
     req.logIn(user, (err) => {
       if (err) { return next(err); }
-      
-      // Save the session before sending a response
+
+      console.log("User is authenticated: ", req.isAuthenticated()); // DEBUGGING STEP
       req.session.save((err) => {
         if (err) {
           return next(err);
