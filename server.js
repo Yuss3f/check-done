@@ -11,30 +11,33 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// Middleware setup
 app.use(cors({
-  origin: "http://127.0.0.1:5500", // Allow both origins
-  credentials: true // Allow credentials (like cookies) to be sent
+  origin: "http://127.0.0.1:5500", // Allow your frontend origin
+  credentials: true                // Allow credentials (cookies) to be shared
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Ensure the express-session is before Passport initialization
 app.use(session({
-  secret: 'yourSecretKey', // Change this to a more secure key
-  resave: false,
+  secret: 'yourSecretKey',           // Change to a secure key in production
+  resave: false, 
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to true if using HTTPS (not needed for localhost)
-    maxAge: 1000 * 60 * 60 * 24 // 1 day
+    httpOnly: true,                 // Prevents JavaScript from accessing the cookie
+    secure: false,                  // False since you're using HTTP (not HTTPS locally)
+    sameSite: 'lax',                // Prevents CSRF attacks (allows cookies with top-level navigation)
+    maxAge: 1000 * 60 * 60 * 24     // Expiration time set for 1 day
   }
 }));
 
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Serve static files (e.g., HTML, CSS, JS) from the 'public' directory
 app.use(express.static('public'));
-
-// Initialize Passport.js
-app.use(passport.initialize());
-app.use(passport.session());
 
 // User Model (Ensure the User model file is correct and imported)
 const User = require('./models/User');
@@ -129,8 +132,23 @@ app.post('/register', async (req, res) => {
 });
 
 // Login Route
-app.post('/login', passport.authenticate('local'), (req, res) => {
-  res.json({ message: 'Login successful', user: req.user });
+app.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) { return next(err); }
+    if (!user) { return res.status(401).json({ message: 'Login failed. Please check your username and password.' }); }
+    
+    req.logIn(user, (err) => {
+      if (err) { return next(err); }
+      
+      // Save the session before sending a response
+      req.session.save((err) => {
+        if (err) {
+          return next(err);
+        }
+        return res.json({ message: 'Login successful', user: req.user });
+      });
+    });
+  })(req, res, next);
 });
 
 // Logout Route
