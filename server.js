@@ -9,7 +9,7 @@ require("dotenv").config();
 
 // Initialize Express App
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5500;
 
 // Middleware setup
 app.use(cors({
@@ -26,7 +26,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,                 // Prevents JavaScript from accessing the cookie
-    secure: false,                  
+    secure: false,                  // False since using HTTP (not HTTPS locally)
     sameSite: 'lax',                // Prevents CSRF attacks (allows cookies with top-level navigation)
     maxAge: 1000 * 60 * 60 * 24     // Expiration time set for 1 day
   }
